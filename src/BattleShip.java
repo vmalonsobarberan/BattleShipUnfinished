@@ -1,31 +1,71 @@
 import java.util.Scanner;
 
-public interface BattleShip {
+public class BattleShip {
     public static final int NUM_ROWS = 8;
     public static final int NUM_COLS = 8;
     public static final String WATER_SYMBOL = "O";
     public static final String SHIP_SYMBOL = "S";
-    public static final String SUNK_SHIP_SYMBOL = "X";
+    public static final String SUNK_SHIP_SYMBOL = "H";
     public static final String EMPTY_SYMBOL = "·";
+    public static final int NUM_SHIPS = 10;
+
+    static CellType[][] matrix = initMatrix();
 
     public static void main(String[] args) {
         int row, col, numShots = 0;
         Scanner input = new Scanner(System.in);
         boolean gameOver = false;
-        CellType[][] matrix = initMatrix();
-        generateRandomShips(matrix);
+
+        generateRandomShips();
         while (!gameOver) {
-            printStatistics(numShots, matrix);
-            printMatrix(true, matrix);
+            printStatistics(numShots);
+            printMatrix(true);
             row = readRowFromKeyboard(input);
             col = readColFromKeyboard(input);
-            shoot(row, col, matrix);
+            shoot(row, col);
             numShots++;
+            if (getSunkShips() == NUM_SHIPS) {
+                gameOver = true;
+            }
         }
+        processGameOver();
     }
 
-    static void shoot(int row, int col, CellType[][] matrix) {
+    static void processGameOver() {
+        System.out.println("You win !!!!");
+    }
 
+    static void printStatistics(int numShots) {
+        System.out.println("\nSHOTS: " + numShots);
+        int sunkShips = getSunkShips();
+        System.out.println("SUNK SHIPS: " + sunkShips);
+    }
+
+    private static int getSunkShips() {
+        int sunkShips = 0;
+        for (int row = 0; row < matrix.length; row++) {
+            for (int col = 0; col < matrix[0].length; col++) {
+                if (matrix[row][col] == CellType.SUNK_SHIP) {
+                    sunkShips ++;
+                }
+            }
+        }
+        return sunkShips;
+    }
+
+    static void shoot(int row, int col) {
+        switch (matrix[row][col]) {
+            case EMPTY:
+                matrix[row][col] = CellType.WATER;
+                break;
+            case WATER:
+                break;
+            case SHIP:
+                matrix[row][col] = CellType.SUNK_SHIP;
+                break;
+            case SUNK_SHIP:
+                break;
+        }
     }
 
     static int readColFromKeyboard(Scanner input) {
@@ -54,7 +94,7 @@ public interface BattleShip {
         return row;
     }
 
-    static void printMatrix(boolean debugginng, CellType[][] matrix) {
+    static void printMatrix(boolean debugginng) {
         printHeader();
         char letter = 'A';
         for (int row = 0; row < matrix.length; row++) {
@@ -89,9 +129,9 @@ public interface BattleShip {
         System.out.println();
     }
 
-    private static void generateRandomShips(CellType[][] matrix) {
+    private static void generateRandomShips() {
         int numShips = 0;
-        while (numShips < 10) {
+        while (numShips < NUM_SHIPS) {
             int row = (int) (Math.random() * NUM_ROWS);
             int col = (int) (Math.random() * NUM_COLS);
             if (matrix[row][col] == CellType.EMPTY) {
